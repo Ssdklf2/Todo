@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Купить корм для черепашки",
+    "category": {
+      "$ref": "categories",
+      "$id": "63e947ecc8e965e7a82bda6d",
+      "$db": ""
+    },
+    "date": "2023-02-14T15:00:00.000+00:00",
+    "completed": false,
+    "priority": "LOW"
+  },
+  {
+    "title": "Покормить собаку",
+    "date": "2023-02-14T13:00:00.000+00:00",
+    "completed": false
+  },
+  {
+    "title": "Купить ингредиенты для пиццы",
+    "completed": true
+  },
+  {
+    "title": "Сделать проект",
+    "category": {
+      "$ref": "categories",
+      "$id": "63e947ecc8e965e7a82bda68",
+      "$db": ""
+    },
+    "date": "2023-02-13T12:00:00.000+00:00",
+    "completed": true,
+    "priority": "MEDIUM"
+  },
+  {
+    "title": "Купить торт на День Рождение",
+    "category": {
+      "$ref": "categories",
+      "$id": "63e947ecc8e965e7a82bda69",
+      "$db": ""
+    },
+    "date": "2023-02-14T13:00:00.000+00:00",
+    "completed": true,
+    "priority": "VERY_HIGH"
+  }
+]
