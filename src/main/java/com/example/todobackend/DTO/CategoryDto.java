@@ -2,12 +2,15 @@ package com.example.todobackend.DTO;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
+@Getter
+@Setter
+public class CategoryDto extends RepresentationModel<CategoryDto> {
     private String title;
 }
