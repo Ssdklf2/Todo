@@ -28,7 +28,7 @@ public class TaskController {
 
 
     @GetMapping
-    public ResponseEntity<List<Task>> getTasks() {
+    public ResponseEntity<List<TaskDto>> getTasks() {
         return ResponseEntity.ok().body(taskService.getList());
     }
 

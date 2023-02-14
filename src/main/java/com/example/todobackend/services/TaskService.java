@@ -34,9 +34,9 @@ public class TaskService {
         return taskMapper.getDtoFromTask(save);
     }
 
-    public List<Task> getList() {
-        return taskRepository.findAll();
-//                .stream().map(taskMapper::getDtoFromTask).toList();
+    public List<TaskDto> getList() {
+        return taskRepository.findAll()
+                .stream().map(taskMapper::getDtoFromTask).toList();
     }
 
     public void delete(String id) {
@@ -59,7 +59,12 @@ public class TaskService {
     }
 
     private Category getCategoryFromDto(TaskDto taskDto) {
-        return categoryRepository.findById(taskDto.getCategoryId())
-                .orElseThrow(() -> new InvalidRequestParameters("Invalid category ID"));
+        Category category = null;
+        if (taskDto.getCategoryId() != null) {
+            category = categoryRepository.findById(taskDto.getCategoryId())
+                    .orElseThrow(() -> new InvalidRequestParameters("Invalid category ID"));
+            ;
+        }
+        return category;
     }
 }
