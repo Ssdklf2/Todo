@@ -60,6 +60,15 @@ public class TaskMapper {
                 getLocalDateTimeFromDto(taskDto));
     }
 
+    public Task updateFields(Task updateTask, TaskDto request, Category category) {
+        updateTask.setTitle(request.getTitle());
+        updateTask.setCompleted(request.isCompleted());
+        updateTask.setCategory(category);
+        updateTask.setPriority(request.getPriority());
+        updateTask.setDeadline(getLocalDateTimeFromDto(request));
+        return updateTask;
+    }
+
     private LocalDateTime getLocalDateTimeFromDto(TaskDto taskDto) {
         LocalDateTime deadline;
         try {

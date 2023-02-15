@@ -1,9 +1,9 @@
 package com.example.todobackend.controllers;
 
 import com.example.todobackend.DTO.TaskDto;
-import com.example.todobackend.model.Task;
 import com.example.todobackend.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -44,11 +44,11 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody TaskDto taskDto, UriComponentsBuilder builder) {
-        Task task = taskService.create(taskDto);
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto, UriComponentsBuilder builder) {
+        TaskDto response = taskService.create(taskDto);
+        String selfLink = response.getLink("self").orElse(Link.of("self")).toString();
         return ResponseEntity.created(builder
-                .path("tasks")
-                .path(String.valueOf(task.getId()))
-                .build().toUri()).body(task);
+                .path(selfLink)
+                .build().toUri()).body(response);
     }
 }

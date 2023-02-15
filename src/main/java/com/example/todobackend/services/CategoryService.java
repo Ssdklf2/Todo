@@ -75,7 +75,7 @@ public class CategoryService {
         return response;
     }
 
-    private static void setSelfLink(CategoryDto response, String id) {
+    private void setSelfLink(CategoryDto response, String id) {
         Link selfLink = linkTo(methodOn(CategoryController.class)
                 .getCategoryByID(id)).withSelfRel();
         response.add(selfLink);
