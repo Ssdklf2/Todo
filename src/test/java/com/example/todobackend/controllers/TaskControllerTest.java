@@ -2,11 +2,8 @@ package com.example.todobackend.controllers;
 
 import com.example.todobackend.DTO.TaskDto;
 import com.example.todobackend.exceptions.NotFoundException;
-import com.example.todobackend.model.Task;
-import com.example.todobackend.model.enums.Priority;
 import com.example.todobackend.services.TaskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +16,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(TaskController.class)
 class TaskControllerTest {
@@ -39,28 +37,35 @@ class TaskControllerTest {
 
     @Test
     public void saveTask_expectStatus_isCreated() throws Exception {
-        TaskDto taskDto = new TaskDto("someTitle", true, "123", Priority.LOW.name(), null);
-        Task task = new Task(ObjectId.get(), "someTitle", true, null, null, null);
-        Mockito.when(taskService.create(taskDto)).thenReturn(task);
+        TaskDto request = new TaskDto("someTitle", true, null, null, null);
+        TaskDto response = new TaskDto("someTitle", true, null, null, null);
+        response.add(linkTo(methodOn(TaskController.class)
+                .getTaskByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(taskService.create(request)).thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders
                         .post(PATH_TASKS)
-                        .content(objectMapper.writeValueAsString(taskDto))
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(task)));
+                .andExpect(jsonPath("$.title").value("someTitle"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_TASKS + "/" + OBJECT_ID));
     }
 
     @Test
     void updateTask_expectStatus_ok() throws Exception {
-        TaskDto taskDto = new TaskDto("someTitle", true, null, null, null);
-        Mockito.when(taskService.update(OBJECT_ID, taskDto)).thenReturn(taskDto);
+        TaskDto request = new TaskDto("someTitle", true, null, null, null);
+        TaskDto response = new TaskDto("updateTitle", true, null, null, null);
+        response.add(linkTo(methodOn(TaskController.class)
+                .getTaskByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(taskService.update(OBJECT_ID, request)).thenReturn(response);
         mockMvc.perform(
                         MockMvcRequestBuilders
                                 .put(PATH_TASKS + "/" + OBJECT_ID)
-                                .content(objectMapper.writeValueAsString(taskDto))
+                                .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(taskDto)));
+                .andExpect(jsonPath("$.title").value("updateTitle"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_TASKS + "/" + OBJECT_ID));
     }
 
 
@@ -102,12 +107,15 @@ class TaskControllerTest {
 
     @Test
     void getById_expectStatus_ok() throws Exception {
-        TaskDto taskDTO = new TaskDto("someTitle", true, null, null, null);
-        Mockito.when(taskService.getTaskById(OBJECT_ID)).thenReturn(taskDTO);
+        TaskDto response = new TaskDto("someTitle", true, null, null, null);
+        response.add(linkTo(methodOn(TaskController.class)
+                .getTaskByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(taskService.getTaskById(OBJECT_ID)).thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders
                         .get(PATH_TASKS + "/" + OBJECT_ID)
                 ).andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(taskDTO)));
+                .andExpect(jsonPath("$.title").value("someTitle"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_TASKS + "/" + OBJECT_ID));
     }
 
     @Test
@@ -126,10 +134,6 @@ class TaskControllerTest {
         TaskDto taskDTO = new TaskDto("someTitle", true, null, null, null);
         TaskDto taskDTO1 = new TaskDto("someTitle1", true, null, null, null);
         TaskDto taskDTO2 = new TaskDto("someTitle2", true, null, null, null);
-//        Task task = new Task(ObjectId.get(), "someTitle", true, null, null, null);
-//        Task task1 = new Task(ObjectId.get(), "someTitle1", true, null, null, null);
-//        Task task2 = new Task(ObjectId.get(), "someTitle2", true, null, null, null);
-//        List<Task> list = Arrays.asList(task, task1, task2);
         List<TaskDto> list = Arrays.asList(taskDTO, taskDTO1, taskDTO2);
         Mockito.when(taskService.getList())
                 .thenReturn(list);

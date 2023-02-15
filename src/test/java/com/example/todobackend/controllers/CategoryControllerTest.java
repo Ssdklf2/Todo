@@ -2,10 +2,8 @@ package com.example.todobackend.controllers;
 
 import com.example.todobackend.DTO.CategoryDto;
 import com.example.todobackend.exceptions.NotFoundException;
-import com.example.todobackend.model.Category;
 import com.example.todobackend.services.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +16,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest({CategoryController.class})
 class CategoryControllerTest {
@@ -33,42 +32,50 @@ class CategoryControllerTest {
 
     private final static String PATH_CATEGORIES = "/categories";
     private final static String NOT_FOUND_MESSAGE = "Category with this id does not exist";
-    private final static String id = "63e947ecc8e965e7a82bda66";
+    private final static String OBJECT_ID = "63e947ecc8e965e7a82bda66";
 
     @Test
     public void saveCategory_expectStatus_isCreated() throws Exception {
-        Category category = new Category(ObjectId.get(), "someTitle");
-        Mockito.when(categoryService.create(Mockito.any())).thenReturn(category);
+        CategoryDto request = new CategoryDto("someTitle");
+        CategoryDto response = new CategoryDto("someTitle");
+        response.add(linkTo(methodOn(CategoryController.class)
+                .getCategoryByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(categoryService.create(request)).thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders
                         .post(PATH_CATEGORIES)
-                        .content(objectMapper.writeValueAsString(category))
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(category)));
+                .andExpect(jsonPath("$.title").value("someTitle"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_CATEGORIES + "/" + OBJECT_ID));
     }
 
     @Test
     void updateCategory_expectStatus_ok() throws Exception {
-        CategoryDto categoryDto = new CategoryDto("title1");
-        Mockito.when(categoryService.update(id, categoryDto)).thenReturn(categoryDto);
+        CategoryDto request = new CategoryDto("title1");
+        CategoryDto response = new CategoryDto("updateTitle");
+        response.add(linkTo(methodOn(CategoryController.class)
+                .getCategoryByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(categoryService.update(OBJECT_ID, request)).thenReturn(response);
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .put(PATH_CATEGORIES + "/" + id)
-                                .content(objectMapper.writeValueAsString(categoryDto))
+                                .put(PATH_CATEGORIES + "/" + OBJECT_ID)
+                                .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(categoryDto)));
+                .andExpect(jsonPath("$.title").value("updateTitle"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_CATEGORIES + "/" + OBJECT_ID));
     }
 
     @Test
     void updateCategory_expectStatus_404() throws Exception {
-        CategoryDto categoryDto = new CategoryDto("title1");
-        Mockito.when(categoryService.update(id, categoryDto))
+        CategoryDto response = new CategoryDto("title1");
+        Mockito.when(categoryService.update(OBJECT_ID, response))
                 .thenThrow(new NotFoundException(NOT_FOUND_MESSAGE));
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .put(PATH_CATEGORIES + "/" + id)
-                                .content(objectMapper.writeValueAsString(categoryDto))
+                                .put(PATH_CATEGORIES + "/" + OBJECT_ID)
+                                .content(objectMapper.writeValueAsString(response))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isNotFound())
                 .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
@@ -76,20 +83,20 @@ class CategoryControllerTest {
 
     @Test
     void deleteCategory_expectStatus_ok() throws Exception {
-        Mockito.doNothing().when(categoryService).delete(id);
+        Mockito.doNothing().when(categoryService).delete(OBJECT_ID);
         mockMvc.perform(
                 MockMvcRequestBuilders
-                        .delete(PATH_CATEGORIES + "/" + id)
+                        .delete(PATH_CATEGORIES + "/" + OBJECT_ID)
         ).andExpect(status().isNoContent());
     }
 
     @Test
     void deleteCategory_expectStatus_404() throws Exception {
         Mockito.doThrow(new NotFoundException(NOT_FOUND_MESSAGE))
-                .when(categoryService).delete(id);
+                .when(categoryService).delete(OBJECT_ID);
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete(PATH_CATEGORIES + "/" + id)
+                                .delete(PATH_CATEGORIES + "/" + OBJECT_ID)
                 ).andExpect(status().isNotFound())
                 .andExpect(mvcResult -> mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
     }
@@ -97,20 +104,23 @@ class CategoryControllerTest {
 
     @Test
     void getById_expectStatus_ok() throws Exception {
-        CategoryDto categoryDto = new CategoryDto("title1");
-        Mockito.when(categoryService.getCategoryById(id)).thenReturn(categoryDto);
+        CategoryDto response = new CategoryDto("title1");
+        response.add(linkTo(methodOn(CategoryController.class)
+                .getCategoryByID(OBJECT_ID)).withSelfRel());
+        Mockito.when(categoryService.getCategoryById(OBJECT_ID)).thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders
-                        .get(PATH_CATEGORIES + "/" + id)
+                        .get(PATH_CATEGORIES + "/" + OBJECT_ID)
                 ).andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(categoryDto)));
+                .andExpect(jsonPath("$.title").value("title1"))
+                .andExpect(jsonPath("$._links.self.href").value(PATH_CATEGORIES + "/" + OBJECT_ID));
     }
 
     @Test
     void getById_expectStatus_404() throws Exception {
-        Mockito.when(categoryService.getCategoryById(id))
+        Mockito.when(categoryService.getCategoryById(OBJECT_ID))
                 .thenThrow(new NotFoundException(NOT_FOUND_MESSAGE));
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(PATH_CATEGORIES + "/" + id)
+                        MockMvcRequestBuilders.get(PATH_CATEGORIES + "/" + OBJECT_ID)
                 ).andExpect(status().isNotFound())
                 .andExpect(mvcResult ->
                         mvcResult.getResolvedException().getClass().equals(NotFoundException.class));

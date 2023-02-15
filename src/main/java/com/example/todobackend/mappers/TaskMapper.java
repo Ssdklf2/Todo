@@ -55,7 +55,7 @@ public class TaskMapper {
                 id,
                 taskDto.getTitle(),
                 taskDto.isCompleted(),
-                categoryFromDto, //getCategoryFromDto(taskDto)
+                categoryFromDto,
                 taskDto.getPriority(),
                 getLocalDateTimeFromDto(taskDto));
     }
