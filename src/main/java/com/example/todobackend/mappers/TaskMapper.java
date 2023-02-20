@@ -1,6 +1,9 @@
 package com.example.todobackend.mappers;
 
+import com.example.todobackend.DTO.CategoryDto;
 import com.example.todobackend.DTO.TaskDto;
+import com.example.todobackend.DTO.TaskResponse;
+import com.example.todobackend.controllers.CategoryController;
 import com.example.todobackend.converters.DateConverter;
 import com.example.todobackend.exceptions.InvalidRequestParameters;
 import com.example.todobackend.model.Category;
@@ -11,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TaskMapper {
@@ -35,6 +41,27 @@ public class TaskMapper {
                 task.getTitle(),
                 task.isCompleted(),
                 category,
+                task.getPriority(),
+                time
+        );
+    }
+
+    public TaskResponse getTaskResponseFromTask(Task task) {
+        CategoryDto categoryDto = null;
+        if (task.getCategory() != null) {
+            Category category = task.getCategory();
+            categoryDto = new CategoryDto(category.getTitle());
+            categoryDto.add(linkTo(methodOn(CategoryController.class)
+                    .getCategoryByID(category.getId().toString())).withSelfRel());
+        }
+        String time = null;
+        if (task.getDeadline() != null) {
+            time = dateConverter.getStringFromTime(task.getDeadline());
+        }
+        return new TaskResponse(
+                task.getTitle(),
+                task.isCompleted(),
+                categoryDto,
                 task.getPriority(),
                 time
         );

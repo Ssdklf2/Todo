@@ -1,6 +1,7 @@
 package com.example.todobackend.services;
 
 import com.example.todobackend.DTO.TaskDto;
+import com.example.todobackend.DTO.TaskResponse;
 import com.example.todobackend.controllers.TaskController;
 import com.example.todobackend.exceptions.InvalidRequestParameters;
 import com.example.todobackend.exceptions.NotFoundException;
@@ -33,7 +34,7 @@ public class TaskService {
         this.taskMapper = taskMapper;
     }
 
-    public TaskDto update(String id, TaskDto request) {
+    public TaskResponse update(String id, TaskDto request) {
         Task updateTask = checkIdAndGetTaskFromRepository(id);
         Category category = getCategoryFromDto(request);
         updateTask = taskMapper.updateFields(updateTask, request, category);
@@ -41,7 +42,7 @@ public class TaskService {
         return getTaskDtoWithSelfLink(taskSave);
     }
 
-    public List<TaskDto> getList() {
+    public List<TaskResponse> getList() {
         return taskRepository.findAll().stream()
                 .map(this::getTaskDtoWithSelfLink)
                 .toList();
@@ -52,12 +53,12 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public TaskDto getTaskById(String id) {
+    public TaskResponse getTaskById(String id) {
         Task task = checkIdAndGetTaskFromRepository(id);
         return getTaskDtoWithSelfLink(task);
     }
 
-    public TaskDto create(TaskDto taskDto) {
+    public TaskResponse create(TaskDto taskDto) {
         Task task = taskMapper.getTaskFromDtoAndGenerateId(taskDto, getCategoryFromDto(taskDto));
         return getTaskDtoWithSelfLink(taskRepository.save(task));
     }
@@ -83,13 +84,13 @@ public class TaskService {
         return category;
     }
 
-    private TaskDto getTaskDtoWithSelfLink(Task task) {
-        TaskDto response = taskMapper.getDtoFromTask(task);
+    private TaskResponse getTaskDtoWithSelfLink(Task task) {
+        TaskResponse response = taskMapper.getTaskResponseFromTask(task);
         setSelfLink(response, task.getId().toString());
         return response;
     }
 
-    private void setSelfLink(TaskDto response, String id) {
+    private void setSelfLink(TaskResponse response, String id) {
         Link selfLink = linkTo(methodOn(TaskController.class)
                 .getTaskByID(id)).withSelfRel();
         response.add(selfLink);
