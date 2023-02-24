@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,5 +19,5 @@ public class TaskResponse extends RepresentationModel<TaskResponse> {
     @JsonProperty("category")
     private CategoryDto category;
     private String priority;
-    private String deadline;
+    private LocalDate deadline;
 }

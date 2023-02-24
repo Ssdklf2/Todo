@@ -3,7 +3,6 @@ package com.example.todobackend.services;
 import com.example.todobackend.DTO.TaskDto;
 import com.example.todobackend.DTO.TaskResponse;
 import com.example.todobackend.controllers.TaskController;
-import com.example.todobackend.exceptions.InvalidRequestParameters;
 import com.example.todobackend.exceptions.NotFoundException;
 import com.example.todobackend.mappers.TaskMapper;
 import com.example.todobackend.model.Category;
@@ -77,9 +76,8 @@ public class TaskService {
      */
     private Category getCategoryFromDto(TaskDto taskDto) {
         Category category = null;
-        if (taskDto.getCategoryId() != null) {
-            category = categoryRepository.findById(taskDto.getCategoryId())
-                    .orElseThrow(() -> new InvalidRequestParameters("Invalid category ID"));
+        if (taskDto.getCategory() != null) {
+            category = categoryRepository.findByTitle(taskDto.getCategory());
         }
         return category;
     }

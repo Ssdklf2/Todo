@@ -6,14 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
     private String title;
-    private boolean completed;
-    private String categoryId;
+    private String category;
     private String priority;
-    private String deadline;
+    private LocalDate deadline;
+    private boolean completed;
 }

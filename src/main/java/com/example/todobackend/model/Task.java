@@ -1,5 +1,6 @@
 package com.example.todobackend.model;
 
+import com.example.todobackend.model.enums.Priority;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +23,6 @@ public class Task {
     private boolean completed;
     @DBRef
     private Category category;
-    private String priority;
-    private LocalDateTime deadline;
+    private Priority priority;
+    private LocalDate deadline;
 }
